@@ -57,13 +57,14 @@
             transition: transform 0.2s;
         }
         .draggable-pill:active { cursor: grabbing; transform: scale(0.95); }
+        .draggable-pill.dragging { opacity: 0.5; }
         
         /* Sentences */
         .sentence-block {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             font-size: 1.1rem;
             line-height: 1.8;
-            padding-bottom: 15px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #EEE;
         }
         
@@ -82,6 +83,22 @@
         }
         .drop-zone.over { background-color: rgba(212, 175, 55, 0.15); border-style: solid; }
         
+        /* Strategic Rationale Feedback */
+        .feedback-text {
+            display: none;
+            font-size: 0.9rem;
+            background-color: #F1F3F5;
+            padding: 12px 18px;
+            border-left: 4px solid var(--gold);
+            margin-top: 15px;
+            border-radius: 0 4px 4px 0;
+            color: #444;
+            line-height: 1.5;
+        }
+        .feedback-text.show { display: block; animation: fadeIn 0.5s ease-in-out; }
+        .feedback-text strong { color: var(--navy); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Validation Button */
         .btn-audit {
             display: block;
@@ -96,7 +113,7 @@
             border-radius: 4px;
             cursor: pointer;
             margin-top: 40px;
-            transition: opacity 0.3s;
+            transition: all 0.3s;
         }
         .btn-audit:hover { opacity: 0.9; }
         
@@ -112,7 +129,6 @@
     <p class="instructions">Drag the strategic terms from the vault into the correct contractual directives. <em>Note: There are distractor terms designed to test your precision.</em></p>
 
     <div class="word-bank" id="wordBank">
-        <!-- 10 Respuestas + 2 Distractores (CIF, T/T) -->
         <div class="draggable-pill" draggable="true" id="term1">MOQs</div>
         <div class="draggable-pill" draggable="true" id="term2">EXW</div>
         <div class="draggable-pill" draggable="true" id="term3">B/L</div>
@@ -130,33 +146,52 @@
     <div class="exercises">
         <div class="sentence-block">
             1. "We cannot accept these high <div class="drop-zone" data-answer="MOQs"></div>; you must lower the minimums for our initial trial run."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> MOQs (Minimum Order Quantities) dictate the production threshold. Lowering them is critical to protect your capital during initial trial runs without overcommitting inventory.</div>
         </div>
+        
         <div class="sentence-block">
             2. "To maintain absolute control over the freight consolidation, we prefer to buy <div class="drop-zone" data-answer="EXW"></div>."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> EXW (Ex Works) gives you, the buyer, absolute control and responsibility over logistics the moment the goods leave the factory door.</div>
         </div>
+        
         <div class="sentence-block">
             3. "Do not authorize the 70% balance payment until the supplier forwards the original <div class="drop-zone" data-answer="B/L"></div>."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> The B/L (Bill of Lading) acts as the legal title of the cargo. Withholding balance payments until its release is a non-negotiable security protocol.</div>
         </div>
+        
         <div class="sentence-block">
             4. "Before we wire any funds, please send the revised <div class="drop-zone" data-answer="PI"></div> detailing all exact costs and specifications."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> A PI (Proforma Invoice) is the preliminary contract detailing exact costs. You never authorize a wire transfer without verifying this document first.</div>
         </div>
+        
         <div class="sentence-block">
             5. "To protect our intellectual property, make sure they sign the <div class="drop-zone" data-answer="NNN"></div> agreement before we share the blueprints."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> An NNN (Non-Disclosure, Non-Use, Non-Circumvention) agreement is the ultimate legal shield used globally to protect proprietary designs before entering negotiations.</div>
         </div>
+        
         <div class="sentence-block">
             6. "We will handle our own cargo insurance, so please quote us <div class="drop-zone" data-answer="FOB"></div> Shanghai."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> FOB (Free on Board) means the seller handles costs until loading. It allows you to select your own freight forwarder and control insurance premiums.</div>
         </div>
+        
         <div class="sentence-block">
             7. "We require seamless domestic entry directly to our warehouse, so quote the entire shipment <div class="drop-zone" data-answer="DDP"></div>."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> DDP (Delivered Duty Paid) forces the seller to handle all shipping, risk, and customs tariffs until the cargo reaches your warehouse floor.</div>
         </div>
+        
         <div class="sentence-block">
             8. "Before authorizing the container loading, we will deploy our own third-party <div class="drop-zone" data-answer="QC"></div> inspectors."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> QC (Quality Control) inspections are mandatory pre-loading leverage points to ensure you never import defective goods.</div>
         </div>
+        
         <div class="sentence-block">
             9. "To secure this high-volume transaction and mitigate risk, we guarantee payment via an irrevocable <div class="drop-zone" data-answer="L/C"></div>."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> An L/C (Letter of Credit) is a bank-issued guarantee ensuring the supplier is only paid once strict, documented shipping conditions are met.</div>
         </div>
+        
         <div class="sentence-block">
             10. "Ensure the <div class="drop-zone" data-answer="HS Code"></div> is perfectly accurate to prevent our cargo from being detained by customs."
+            <div class="feedback-text"><strong>Strategic Rationale:</strong> The HS Code dictates your import tariffs. A misclassification immediately triggers customs detentions, inspections, and financial penalties.</div>
         </div>
     </div>
 
@@ -169,40 +204,24 @@
     const wordBank = document.getElementById('wordBank');
 
     draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', () => {
-            draggable.classList.add('dragging');
-        });
-        draggable.addEventListener('dragend', () => {
-            draggable.classList.remove('dragging');
-        });
+        draggable.addEventListener('dragstart', () => { draggable.classList.add('dragging'); });
+        draggable.addEventListener('dragend', () => { draggable.classList.remove('dragging'); });
     });
 
     dropZones.forEach(zone => {
-        zone.addEventListener('dragover', e => {
-            e.preventDefault();
-            zone.classList.add('over');
-        });
-        zone.addEventListener('dragleave', () => {
-            zone.classList.remove('over');
-        });
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => { zone.classList.remove('over'); });
         zone.addEventListener('drop', e => {
             e.preventDefault();
             zone.classList.remove('over');
             const dragged = document.querySelector('.dragging');
-            
-            // Si la zona ya tiene una palabra, devolverla a la bóveda
-            if (zone.children.length > 0) {
-                wordBank.appendChild(zone.children[0]);
-            }
+            if (zone.children.length > 0) { wordBank.appendChild(zone.children[0]); }
             zone.appendChild(dragged);
-            zone.classList.remove('correct-zone', 'incorrect-zone'); // Limpiar estilos previos
+            zone.classList.remove('correct-zone', 'incorrect-zone');
         });
     });
 
-    // Permitir devolver palabras a la bóveda
-    wordBank.addEventListener('dragover', e => {
-        e.preventDefault();
-    });
+    wordBank.addEventListener('dragover', e => { e.preventDefault(); });
     wordBank.addEventListener('drop', e => {
         e.preventDefault();
         const dragged = document.querySelector('.dragging');
@@ -210,13 +229,20 @@
     });
 
     function auditSyntax() {
+        let correctCount = 0;
         dropZones.forEach(zone => {
             const correctAnswer = zone.getAttribute('data-answer');
+            const feedback = zone.closest('.sentence-block').querySelector('.feedback-text');
+            
+            // Mostrar la justificación siempre que se presione auditar
+            if(feedback) feedback.classList.add('show');
+
             if (zone.children.length > 0) {
                 const userAnswer = zone.children[0].innerText.trim();
                 if (userAnswer === correctAnswer) {
                     zone.classList.add('correct-zone');
                     zone.classList.remove('incorrect-zone');
+                    correctCount++;
                 } else {
                     zone.classList.add('incorrect-zone');
                     zone.classList.remove('correct-zone');
@@ -225,6 +251,22 @@
                 zone.classList.add('incorrect-zone');
             }
         });
+
+        const btn = document.querySelector('.btn-audit');
+        if (correctCount === 10) {
+            btn.innerText = "Audit Passed: 10/10 Perfect Syntax";
+            btn.style.backgroundColor = "#2E7D32";
+            btn.style.color = "#FFFFFF";
+        } else {
+            btn.innerText = `Audit Failed: ${correctCount}/10 Correct. Review strategies.`;
+            btn.style.backgroundColor = "#C62828";
+            btn.style.color = "#FFFFFF";
+            setTimeout(() => {
+                btn.innerText = "Audit Executive Syntax";
+                btn.style.backgroundColor = "var(--gold)";
+                btn.style.color = "var(--navy)";
+            }, 4000);
+        }
     }
 </script>
 </body>
